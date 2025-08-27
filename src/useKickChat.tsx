@@ -52,7 +52,11 @@ export default function useKickChat(soundList: SoundType[], soundCooldown: any, 
           const parsed = JSON.parse(ev.data as string);
           if (parsed && !parsed.event.includes("ChatMessageEvent")) return;
 
-          const message = JSON.parse(parsed.data).content;
+          let message = JSON.parse(parsed.data).content;
+
+          if (message.startsWith("[") && message.endsWith("]")) {
+            message = message.split(":").pop()?.replace("]", "");
+          }
 
           let triggerWord: string | null = null;
 
