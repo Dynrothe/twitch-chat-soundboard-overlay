@@ -18,7 +18,7 @@ export default function useKickChat(soundList: SoundType[], soundCooldown: any, 
   const listOfTriggerWords = new Set<string>();
 
   useEffect(() => {
-    if (!TWITCH_CHANNEL || connected || initialized || !ENABLED || KICK !== "true") return;
+    if (!TWITCH_CHANNEL || connected || initialized || ENABLED === "false" || KICK !== "true") return;
     if (soundList.length === 0) return;
 
     setInitialized(true);

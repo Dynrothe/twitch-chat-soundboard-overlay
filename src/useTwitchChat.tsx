@@ -14,7 +14,7 @@ const useTwitchChat = (soundList: SoundType[], soundCooldown: any, playSound: Fu
   const listOfTriggerWords = new Set<string>();
 
   useEffect(() => {
-    if (!TWITCH_CHANNEL || !ENABLED || initialized || KICK === "true") return;
+    if (!TWITCH_CHANNEL || ENABLED === "false" || initialized || KICK === "true") return;
     if (soundList.length === 0) return;
 
     setInitialized(true);
