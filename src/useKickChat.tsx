@@ -54,6 +54,10 @@ export default function useKickChat(soundList: SoundType[], soundCooldown: any, 
 
           let message = JSON.parse(parsed.data).content;
 
+          if (/[\uDB40\uDC00-\uDC7F]/.test(message)) {
+            message = message.replace(/\uDB40[\uDC00-\uDC7F]/g, "").trimEnd();
+          }
+
           if (message.startsWith("[") && message.endsWith("]")) {
             message = message.split(":").pop()?.replace("]", "");
           }
