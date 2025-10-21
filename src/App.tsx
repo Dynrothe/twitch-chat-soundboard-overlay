@@ -7,6 +7,7 @@ import useKickChat from "./useKickChat";
 
 function App() {
   const urlParams = new URLSearchParams(window.location.search);
+  const AUDIO_NAME = urlParams.get("audioname");
 
   // Pass required information to the widget with URL parameters.
   const TWITCH_CHANNEL = urlParams.get("channel");
@@ -59,7 +60,6 @@ function App() {
     );
   }
 
-  // The actual page shown.
   return (
     <div
       style={{
@@ -67,7 +67,7 @@ function App() {
       }}
       className="container"
     >
-      {soundList.length > 1 ? (
+      {soundList.length >= 1 && !AUDIO_NAME ? (
         <h1 style={{ margin: "0", padding: "0" }}>
           {soundList.filter((sound: SoundType) => sound.enabled === "true").length} sounds enabled
         </h1>
