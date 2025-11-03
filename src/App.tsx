@@ -30,7 +30,14 @@ function App() {
   useGetSoundList(setSoundList, soundList);
 
   const playSound = (sound: SoundType, triggerWord: string) => {
-    const audio = new Audio(decodeURI(sound.sound));
+    let audioClip = sound.sound;
+    const isArray = Array.isArray(audioClip);
+
+    if (isArray) {
+      audioClip = audioClip[Math.floor(Math.random() * audioClip.length)];
+    }
+
+    const audio = new Audio(decodeURI(audioClip));
     audio.volume = Number(sound.volume) || 0.5;
 
     audio.play();
