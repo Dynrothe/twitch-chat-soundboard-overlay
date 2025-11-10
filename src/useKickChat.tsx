@@ -10,6 +10,7 @@ export default function useKickChat(soundList: SoundType[], soundCooldown: any, 
   const MESSAGE_CONTAINS = urlParams.get("messagecontains");
   const ENABLED = urlParams.get("enabled");
   const KICK = urlParams.get("kick");
+  const ALLOW_MODIFIERS = urlParams.get("allowmodifiers");
 
   const [connected, setConnected] = useState(false);
   const [initialized, setInitialized] = useState<boolean>(false);
@@ -58,23 +59,33 @@ export default function useKickChat(soundList: SoundType[], soundCooldown: any, 
             message = message.replace(/\uDB40[\uDC00-\uDC7F]/g, "").trimEnd();
           }
 
-          if (message.startsWith("[") && message.endsWith("]")) {
-            message = message.split(":").pop()?.replace("]", "");
-          }
-
           let triggerWord: string | null = null;
+          let modifier: string | null = null;
 
           if (MESSAGE_CONTAINS === "true") {
             const words = message.split(/\s+/);
 
             words.some((word: string) => {
-              if (listOfTriggerWords.has(word)) {
-                triggerWord = word;
+              let cleanedWord = "";
+
+              if (word.startsWith("[") && word.endsWith("]")) {
+                cleanedWord = word.split(":").pop()?.replace("]", "") || "";
+              }
+
+              if (listOfTriggerWords.has(cleanedWord)) {
+                triggerWord = cleanedWord;
               }
             });
           } else {
-            if (listOfTriggerWords.has(message)) {
-              triggerWord = message;
+            const words = message.split(/\s+/);
+
+            if (words[0].startsWith("[") && words[0].endsWith("]")) {
+              words[0] = words[0].split(":").pop()?.replace("]", "");
+            }
+
+            if (listOfTriggerWords.has(words[0])) {
+              triggerWord = words[0];
+              modifier = words[1];
             }
           }
 
@@ -85,6 +96,32 @@ export default function useKickChat(soundList: SoundType[], soundCooldown: any, 
 
           const roll = Math.random() * 100 < Number(sound.chance.replace("%", ""));
           if (!roll) return;
+
+          if (ALLOW_MODIFIERS === "true") {
+            switch (modifier) {
+              case "slow":
+                sound.playback_speed = 0.75;
+                break;
+              case "slower":
+                sound.playback_speed = 0.5;
+                break;
+              case "slowest":
+                sound.playback_speed = 0.25;
+                break;
+              case "fast":
+                sound.playback_speed = 1.25;
+                break;
+              case "faster":
+                sound.playback_speed = 1.5;
+                break;
+              case "fastest":
+                sound.playback_speed = 2;
+                break;
+              default:
+                sound.playback_speed = 1;
+                break;
+            }
+          }
 
           playSound(sound, triggerWord);
         } catch {

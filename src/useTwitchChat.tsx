@@ -9,6 +9,9 @@ const useTwitchChat = (soundList: SoundType[], soundCooldown: any, playSound: Fu
   const MESSAGE_CONTAINS = urlParams.get("messagecontains");
   const ENABLED = urlParams.get("enabled");
   const KICK = urlParams.get("kick");
+  const ALLOW_MODIFIERS = urlParams.get("allowmodifiers");
+
+  const ZERO_WIDTH_REGEX = /[\u200B\u200C\u200D\uFEFF\u2060\u180E]/g;
 
   const [initialized, setInitialized] = useState<boolean>(false);
   const listOfTriggerWords = new Set<string>();
@@ -45,11 +48,12 @@ const useTwitchChat = (soundList: SoundType[], soundCooldown: any, playSound: Fu
     twitchClient.on("message", (_channel: string, tags: tmi.ChatUserstate, message: string) => {
       if (!tags) return;
 
-      if (/[\u0020\uDBC0]/.test(message)) {
-        message = message.slice(0, -3);
+      if (ZERO_WIDTH_REGEX.test(message)) {
+        message = message.replace(ZERO_WIDTH_REGEX, "");
       }
 
       let triggerWord: string | null = null;
+      let modifier: string | null = null;
 
       if (MESSAGE_CONTAINS === "true") {
         const words = message.split(/\s+/);
@@ -60,8 +64,11 @@ const useTwitchChat = (soundList: SoundType[], soundCooldown: any, playSound: Fu
           }
         });
       } else {
-        if (listOfTriggerWords.has(message)) {
-          triggerWord = message;
+        const words = message.split(/\s+/);
+
+        if (listOfTriggerWords.has(words[0])) {
+          triggerWord = words[0];
+          modifier = words[1];
         }
       }
 
@@ -72,6 +79,29 @@ const useTwitchChat = (soundList: SoundType[], soundCooldown: any, playSound: Fu
 
       const roll = Math.random() * 100 < Number(sound.chance.replace("%", ""));
       if (!roll) return;
+
+      if (ALLOW_MODIFIERS === "true" && modifier) {
+        switch (modifier) {
+          case "slow":
+            sound.playback_speed = 0.75;
+            break;
+          case "slower":
+            sound.playback_speed = 0.5;
+            break;
+          case "slowest":
+            sound.playback_speed = 0.25;
+            break;
+          case "fast":
+            sound.playback_speed = 1.25;
+            break;
+          case "faster":
+            sound.playback_speed = 1.5;
+            break;
+          case "fastest":
+            sound.playback_speed = 2;
+            break;
+        }
+      }
 
       playSound(sound, triggerWord);
     });

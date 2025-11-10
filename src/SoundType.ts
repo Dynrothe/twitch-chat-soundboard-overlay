@@ -5,5 +5,6 @@ export type SoundType = {
   volume: number;
   chance: string;
   trigger_cooldown: number | null;
+  playback_speed: number | null;
   enabled: string;
 };

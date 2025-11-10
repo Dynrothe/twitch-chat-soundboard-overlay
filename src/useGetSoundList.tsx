@@ -27,6 +27,7 @@ export const useGetSoundList = (setSoundList: Function, soundList: SoundType[]) 
         volume: Number(VOLUME!),
         chance: RANDOM_CHANCE || "100%",
         trigger_cooldown: Number(TRIGGER_COOLDOWN) || null,
+        playback_speed: 1,
         enabled: ENABLED!,
       };
 

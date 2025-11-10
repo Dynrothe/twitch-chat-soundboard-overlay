@@ -7,11 +7,11 @@ import useKickChat from "./useKickChat";
 
 function App() {
   const urlParams = new URLSearchParams(window.location.search);
-  const AUDIO_NAME = urlParams.get("audioname");
 
   // Pass required information to the widget with URL parameters.
   const TWITCH_CHANNEL = urlParams.get("channel");
   const ENABLED = urlParams.get("enabled");
+  const AUDIO_NAME = urlParams.get("audioname");
 
   if (!TWITCH_CHANNEL)
     return (
@@ -39,6 +39,10 @@ function App() {
 
     const audio = new Audio(decodeURI(audioClip));
     audio.volume = Number(sound.volume) || 0.5;
+
+    if (sound.playback_speed) {
+      audio.playbackRate = sound.playback_speed;
+    }
 
     audio.play();
 
