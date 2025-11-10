@@ -68,7 +68,7 @@ const useTwitchChat = (soundList: SoundType[], soundCooldown: any, playSound: Fu
 
         if (listOfTriggerWords.has(words[0])) {
           triggerWord = words[0];
-          modifier = words[1];
+          modifier = words[1] ? words[1].toLowerCase() : null;
         }
       }
 
@@ -80,7 +80,7 @@ const useTwitchChat = (soundList: SoundType[], soundCooldown: any, playSound: Fu
       const roll = Math.random() * 100 < Number(sound.chance.replace("%", ""));
       if (!roll) return;
 
-      let playbackSpeed = 1;
+      let playbackSpeed = sound.playback_speed || 1;
 
       if (ALLOW_MODIFIERS === "true" && modifier) {
         switch (modifier) {
