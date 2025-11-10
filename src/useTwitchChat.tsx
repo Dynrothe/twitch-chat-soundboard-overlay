@@ -80,30 +80,32 @@ const useTwitchChat = (soundList: SoundType[], soundCooldown: any, playSound: Fu
       const roll = Math.random() * 100 < Number(sound.chance.replace("%", ""));
       if (!roll) return;
 
+      let playbackSpeed = 1;
+
       if (ALLOW_MODIFIERS === "true" && modifier) {
         switch (modifier) {
           case "slow":
-            sound.playback_speed = 0.75;
+            playbackSpeed = 0.75;
             break;
           case "slower":
-            sound.playback_speed = 0.5;
+            playbackSpeed = 0.5;
             break;
           case "slowest":
-            sound.playback_speed = 0.25;
+            playbackSpeed = 0.25;
             break;
           case "fast":
-            sound.playback_speed = 1.25;
+            playbackSpeed = 1.25;
             break;
           case "faster":
-            sound.playback_speed = 1.5;
+            playbackSpeed = 1.5;
             break;
           case "fastest":
-            sound.playback_speed = 2;
+            playbackSpeed = 2;
             break;
         }
       }
 
-      playSound(sound, triggerWord);
+      playSound(sound, triggerWord, playbackSpeed);
     });
   }, [soundList]);
 };

@@ -38,7 +38,7 @@ function App() {
     return audioCtx!;
   };
 
-  const playSound = async (sound: SoundType, triggerWord: string) => {
+  const playSound = async (sound: SoundType, triggerWord: string, playbackSpeed: number) => {
     let audioClip = Array.isArray(sound.sound)
       ? sound.sound[Math.floor(Math.random() * sound.sound.length)]
       : sound.sound;
@@ -53,7 +53,7 @@ function App() {
     const source = audioContext.createBufferSource();
     source.buffer = audioData;
 
-    source.playbackRate.value = sound.playback_speed || 1;
+    source.playbackRate.value = playbackSpeed;
 
     const gainNode = audioContext.createGain();
     gainNode.gain.value = Number(sound.volume) || 0.5;
