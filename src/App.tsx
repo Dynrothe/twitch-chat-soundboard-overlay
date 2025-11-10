@@ -8,21 +8,20 @@ import useKickChat from "./useKickChat";
 function App() {
   const urlParams = new URLSearchParams(window.location.search);
 
-  // Pass required information to the widget with URL parameters.
   const TWITCH_CHANNEL = urlParams.get("channel");
   const ENABLED = urlParams.get("enabled");
   const AUDIO_NAME = urlParams.get("audioname");
 
-  if (!TWITCH_CHANNEL)
+  if (!TWITCH_CHANNEL) {
     return (
       <>
-        You need to put the twitch channel in the url! example:{" "}
-        <a href="https//repo.pogly.gg/chatsoundboard/?channel=bobross">
-          https//repo.pogly.gg/chatsoundboard/?channel=bobross
+        You need to put the Twitch channel in the URL! Example:{" "}
+        <a href="https://repo.pogly.gg/chatsoundboard/?channel=bobross">
+          https://repo.pogly.gg/chatsoundboard/?channel=bobross
         </a>
-        !
       </>
     );
+  }
 
   const [soundList, setSoundList] = useState<SoundType[]>([]);
   const soundCooldown = useRef<string[]>([]);
@@ -30,29 +29,40 @@ function App() {
   useGetSoundList(setSoundList, soundList);
 
   const playSound = (sound: SoundType, triggerWord: string) => {
-    let audioClip = sound.sound;
-    const isArray = Array.isArray(audioClip);
+    let audioClip = Array.isArray(sound.sound)
+      ? sound.sound[Math.floor(Math.random() * sound.sound.length)]
+      : sound.sound;
 
-    if (isArray) {
-      audioClip = audioClip[Math.floor(Math.random() * audioClip.length)];
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+
+    // Load audio file
+    fetch(decodeURI(audioClip))
+      .then((res) => res.arrayBuffer())
+      .then((arrayBuffer) => audioContext.decodeAudioData(arrayBuffer))
+      .then((audioBuffer) => {
+        const source = audioContext.createBufferSource();
+        source.buffer = audioBuffer;
+
+        // Playback speed (affects pitch too)
+        source.playbackRate.value = sound.playback_speed || 1;
+
+        const gainNode = audioContext.createGain();
+        gainNode.gain.value = Number(sound.volume) || 0.5;
+
+        source.connect(gainNode).connect(audioContext.destination);
+        source.start();
+      })
+      .catch((err) => console.error("Audio playback failed:", err));
+
+    // Cooldown
+    if (sound.trigger_cooldown) {
+      soundCooldown.current.push(sound.trigger_word);
+      setTimeout(() => {
+        soundCooldown.current = soundCooldown.current.filter(
+          (word) => word !== triggerWord
+        );
+      }, sound.trigger_cooldown * 1000);
     }
-
-    const audio = new Audio(decodeURI(audioClip));
-    audio.volume = Number(sound.volume) || 0.5;
-
-    if (sound.playback_speed) {
-      audio.playbackRate = sound.playback_speed;
-    }
-
-    audio.play();
-
-    if (!sound.trigger_cooldown) return;
-
-    soundCooldown.current.push(sound.trigger_word);
-
-    setTimeout(() => {
-      soundCooldown.current = soundCooldown.current.filter((word) => word !== triggerWord);
-    }, sound.trigger_cooldown * 1000);
   };
 
   useTwitchChat(soundList, soundCooldown, playSound);
@@ -61,29 +71,25 @@ function App() {
   if (soundList.length === 0) {
     return (
       <div
-        style={{
-          color: `${ENABLED === "true" ? "green" : "red"}`,
-        }}
+        style={{ color: `${ENABLED === "true" ? "green" : "red"}` }}
         className="container"
       >
-        <h1 style={{ margin: "0", padding: "0" }}>No sounds loaded</h1>
+        <h1 style={{ margin: 0, padding: 0 }}>No sounds loaded</h1>
       </div>
     );
   }
 
   return (
     <div
-      style={{
-        color: `${ENABLED === "true" ? "green" : "red"}`,
-      }}
+      style={{ color: `${ENABLED === "true" ? "green" : "red"}` }}
       className="container"
     >
       {soundList.length >= 1 && !AUDIO_NAME ? (
-        <h1 style={{ margin: "0", padding: "0" }}>
+        <h1 style={{ margin: 0, padding: 0 }}>
           {soundList.filter((sound: SoundType) => sound.enabled === "true").length} sounds enabled
         </h1>
       ) : (
-        <h1 style={{ margin: "0", padding: "0" }}>{soundList[0].name}</h1>
+        <h1 style={{ margin: 0, padding: 0 }}>{soundList[0].name}</h1>
       )}
     </div>
   );
