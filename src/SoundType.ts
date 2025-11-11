@@ -7,4 +7,5 @@ export type SoundType = {
   trigger_cooldown: number | null;
   playback_speed: number | null;
   enabled: string;
+  reverse?: boolean;
 };
