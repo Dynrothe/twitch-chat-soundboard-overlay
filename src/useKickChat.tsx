@@ -119,6 +119,9 @@ export default function useKickChat(soundList: SoundType[], soundCooldown: any, 
               case "fastest":
                 playbackSpeed = 2;
                 break;
+               case "reverse":
+                sound.reverse = true;
+                break;
             }
           }
 

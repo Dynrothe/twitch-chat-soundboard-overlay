@@ -50,10 +50,19 @@ function App() {
     const arrayBuffer = await audioReq.arrayBuffer();
     const audioData = await audioContext.decodeAudioData(arrayBuffer);
 
+    // ✅ Reverse playback if enabled
+    if (sound.reverse === true) {
+      for (let i = 0; i < audioData.numberOfChannels; i++) {
+        const channelData = audioData.getChannelData(i);
+        channelData.reverse();
+      }
+    }
+
     const source = audioContext.createBufferSource();
     source.buffer = audioData;
 
     source.playbackRate.value = playbackSpeed;
+    sound.reverse = false; // Reset reverse after use
 
     const gainNode = audioContext.createGain();
     gainNode.gain.value = Number(sound.volume) || 0.5;

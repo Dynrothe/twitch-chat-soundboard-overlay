@@ -102,6 +102,9 @@ const useTwitchChat = (soundList: SoundType[], soundCooldown: any, playSound: Fu
           case "fastest":
             playbackSpeed = 2;
             break;
+          case "reverse":
+            sound.reverse = true;
+            break;
         }
       }
 
