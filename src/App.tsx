@@ -11,6 +11,7 @@ function App() {
   const TWITCH_CHANNEL = urlParams.get("channel");
   const ENABLED = urlParams.get("enabled");
   const AUDIO_NAME = urlParams.get("audioname");
+  const ALLOW_MODIFIERS = urlParams.get("allowmodifiers");
 
   let audioCtx: AudioContext | null = null;
 
@@ -38,7 +39,7 @@ function App() {
     return audioCtx!;
   };
 
-  const playSound = async (sound: SoundType, triggerWord: string, playbackSpeed: number) => {
+  const playSound = async (sound: SoundType, triggerWord: string, modifiers: any) => {
     let audioClip = Array.isArray(sound.sound)
       ? sound.sound[Math.floor(Math.random() * sound.sound.length)]
       : sound.sound;
@@ -50,19 +51,22 @@ function App() {
     const arrayBuffer = await audioReq.arrayBuffer();
     const audioData = await audioContext.decodeAudioData(arrayBuffer);
 
-    // ✅ Reverse playback if enabled
-    if (sound.reverse === true) {
-      for (let i = 0; i < audioData.numberOfChannels; i++) {
-        const channelData = audioData.getChannelData(i);
-        channelData.reverse();
-      }
-    }
-
     const source = audioContext.createBufferSource();
     source.buffer = audioData;
+    source.playbackRate.value = sound.playback_speed || 1;
 
-    source.playbackRate.value = playbackSpeed;
-    sound.reverse = false; // Reset reverse after use
+    if (ALLOW_MODIFIERS === "true") {
+      if (modifiers.reverse) {
+        for (let i = 0; i < audioData.numberOfChannels; i++) {
+          const channelData = audioData.getChannelData(i);
+          channelData.reverse();
+        }
+      }
+
+      if (modifiers.speed) {
+        source.playbackRate.value = modifiers.speed;
+      }
+    }
 
     const gainNode = audioContext.createGain();
     gainNode.gain.value = Number(sound.volume) || 0.5;

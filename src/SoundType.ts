@@ -6,6 +6,6 @@ export type SoundType = {
   chance: string;
   trigger_cooldown: number | null;
   playback_speed: number | null;
+  reverse: boolean;
   enabled: string;
-  reverse?: boolean;
 };

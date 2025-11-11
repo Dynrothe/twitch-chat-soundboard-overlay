@@ -9,7 +9,6 @@ const useTwitchChat = (soundList: SoundType[], soundCooldown: any, playSound: Fu
   const MESSAGE_CONTAINS = urlParams.get("messagecontains");
   const ENABLED = urlParams.get("enabled");
   const KICK = urlParams.get("kick");
-  const ALLOW_MODIFIERS = urlParams.get("allowmodifiers");
 
   const ZERO_WIDTH_REGEX = /[\u200B\u200C\u200D\uFEFF\u2060\u180E]/g;
 
@@ -53,7 +52,6 @@ const useTwitchChat = (soundList: SoundType[], soundCooldown: any, playSound: Fu
       }
 
       let triggerWord: string | null = null;
-      let modifier: string | null = null;
 
       if (MESSAGE_CONTAINS === "true") {
         const words = message.split(/\s+/);
@@ -65,10 +63,8 @@ const useTwitchChat = (soundList: SoundType[], soundCooldown: any, playSound: Fu
         });
       } else {
         const words = message.split(/\s+/);
-
         if (listOfTriggerWords.has(words[0])) {
           triggerWord = words[0];
-          modifier = words[1] ? words[1].toLowerCase() : null;
         }
       }
 
@@ -80,37 +76,29 @@ const useTwitchChat = (soundList: SoundType[], soundCooldown: any, playSound: Fu
       const roll = Math.random() * 100 < Number(sound.chance.replace("%", ""));
       if (!roll) return;
 
-      let playbackSpeed = sound.playback_speed || 1;
+      const args = message.split(/\s+/);
+      const modifiers = handleModifiers(args);
 
-      if (ALLOW_MODIFIERS === "true" && modifier) {
-        switch (modifier) {
-          case "slow":
-            playbackSpeed = 0.75;
-            break;
-          case "slower":
-            playbackSpeed = 0.5;
-            break;
-          case "slowest":
-            playbackSpeed = 0.25;
-            break;
-          case "fast":
-            playbackSpeed = 1.25;
-            break;
-          case "faster":
-            playbackSpeed = 1.5;
-            break;
-          case "fastest":
-            playbackSpeed = 2;
-            break;
-          case "reverse":
-            sound.reverse = true;
-            break;
-        }
-      }
-
-      playSound(sound, triggerWord, playbackSpeed);
+      playSound(sound, triggerWord, modifiers);
     });
   }, [soundList]);
 };
 
 export default useTwitchChat;
+
+function handleModifiers(args: any) {
+  const arg1 = args[1]?.toLowerCase();
+  const arg2 = args[2]?.toLowerCase();
+
+  const reverse = arg1 === "reverse" || arg2 === "reverse";
+
+  const percentRegex = /^\d+%$/;
+  const percentArg = [arg1, arg2].find((a) => percentRegex.test(a));
+
+  const speed = percentArg ? (parseFloat(percentArg) / 100).toFixed(1) : null;
+
+  return {
+    reverse,
+    speed,
+  };
+}
