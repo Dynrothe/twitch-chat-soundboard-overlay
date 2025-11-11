@@ -56,14 +56,14 @@ function App() {
     source.playbackRate.value = sound.playback_speed || 1;
 
     if (ALLOW_MODIFIERS === "true") {
-      if (modifiers.reverse) {
+      if (modifiers.reverse && !sound.reverse) {
         for (let i = 0; i < audioData.numberOfChannels; i++) {
           const channelData = audioData.getChannelData(i);
           channelData.reverse();
         }
       }
 
-      if (modifiers.speed) {
+      if (modifiers.speed && !sound.playback_speed) {
         source.playbackRate.value = modifiers.speed;
       }
     }
