@@ -153,12 +153,18 @@ function handleModifiers(args: any, minpitch: any, maxpitch: any) {
   const percentRegex = /^\d+%$/;
   let percentArg = [arg1, arg2].find((a) => percentRegex.test(a));
 
+  // I'm lazy :)
   if (percentArg && minpitch) {
-    percentArg = percentArg < minpitch ? minpitch : percentArg;
-  } else if (percentArg && maxpitch) {
-    percentArg = percentArg > maxpitch ? maxpitch : percentArg;
+    if (parseFloat(percentArg) < parseFloat(minpitch)) {
+      percentArg = parseFloat(minpitch);
+    }
   }
 
+  if (percentArg && maxpitch) {
+    if (parseFloat(percentArg) > parseFloat(maxpitch)) {
+      percentArg = parseFloat(maxpitch);
+    }
+  }
   const speed = percentArg ? (parseFloat(percentArg) / 100).toFixed(1) : null;
 
   return {
