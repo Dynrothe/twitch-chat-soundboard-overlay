@@ -10,6 +10,8 @@ export default function useKickChat(soundList: SoundType[], soundCooldown: any, 
   const MESSAGE_CONTAINS = urlParams.get("messagecontains");
   const ENABLED = urlParams.get("enabled");
   const KICK = urlParams.get("kick");
+  const MINIMUM_PITCH = urlParams.get("minpitch");
+  const MAX_PITCH = urlParams.get("maxpitch");
 
   const [connected, setConnected] = useState(false);
   const [initialized, setInitialized] = useState<boolean>(false);
@@ -95,7 +97,7 @@ export default function useKickChat(soundList: SoundType[], soundCooldown: any, 
           if (!roll) return;
 
           const args = message.split(/\s+/);
-          const modifiers = handleModifiers(args);
+          const modifiers = handleModifiers(args, MINIMUM_PITCH, MAX_PITCH);
 
           playSound(sound, triggerWord, modifiers);
         } catch {
@@ -142,14 +144,20 @@ const getChannelRoomID = async (channel: string) => {
   }
 };
 
-function handleModifiers(args: any) {
+function handleModifiers(args: any, minpitch: any, maxpitch: any) {
   const arg1 = args[1]?.toLowerCase();
   const arg2 = args[2]?.toLowerCase();
 
   const reverse = arg1 === "reverse" || arg2 === "reverse";
 
   const percentRegex = /^\d+%$/;
-  const percentArg = [arg1, arg2].find((a) => percentRegex.test(a));
+  let percentArg = [arg1, arg2].find((a) => percentRegex.test(a));
+
+  if (percentArg && minpitch) {
+    percentArg = percentArg < minpitch ? minpitch : percentArg;
+  } else if (percentArg && maxpitch) {
+    percentArg = percentArg > maxpitch ? maxpitch : percentArg;
+  }
 
   const speed = percentArg ? (parseFloat(percentArg) / 100).toFixed(1) : null;
 

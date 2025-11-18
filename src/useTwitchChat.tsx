@@ -9,6 +9,9 @@ const useTwitchChat = (soundList: SoundType[], soundCooldown: any, playSound: Fu
   const MESSAGE_CONTAINS = urlParams.get("messagecontains");
   const ENABLED = urlParams.get("enabled");
   const KICK = urlParams.get("kick");
+  const SUB_ONLY = urlParams.get("subonly");
+  const MINIMUM_PITCH = urlParams.get("minpitch");
+  const MAX_PITCH = urlParams.get("maxpitch");
 
   const ZERO_WIDTH_REGEX = /[\u200B\u200C\u200D\uFEFF\u2060\u180E]/g;
 
@@ -47,6 +50,8 @@ const useTwitchChat = (soundList: SoundType[], soundCooldown: any, playSound: Fu
     twitchClient.on("message", (_channel: string, tags: tmi.ChatUserstate, message: string) => {
       if (!tags) return;
 
+      if (SUB_ONLY === "true" && !tags.subscriber) return;
+
       if (ZERO_WIDTH_REGEX.test(message)) {
         message = message.replace(ZERO_WIDTH_REGEX, "");
       }
@@ -77,7 +82,7 @@ const useTwitchChat = (soundList: SoundType[], soundCooldown: any, playSound: Fu
       if (!roll) return;
 
       const args = message.split(/\s+/);
-      const modifiers = handleModifiers(args);
+      const modifiers = handleModifiers(args, MINIMUM_PITCH, MAX_PITCH);
 
       playSound(sound, triggerWord, modifiers);
     });
@@ -86,14 +91,20 @@ const useTwitchChat = (soundList: SoundType[], soundCooldown: any, playSound: Fu
 
 export default useTwitchChat;
 
-function handleModifiers(args: any) {
+function handleModifiers(args: any, minpitch: any, maxpitch: any) {
   const arg1 = args[1]?.toLowerCase();
   const arg2 = args[2]?.toLowerCase();
 
   const reverse = arg1 === "reverse" || arg2 === "reverse";
 
   const percentRegex = /^\d+%$/;
-  const percentArg = [arg1, arg2].find((a) => percentRegex.test(a));
+  let percentArg = [arg1, arg2].find((a) => percentRegex.test(a));
+
+  if (percentArg && minpitch) {
+    percentArg = percentArg < minpitch ? minpitch : percentArg;
+  } else if (percentArg && maxpitch) {
+    percentArg = percentArg > maxpitch ? maxpitch : percentArg;
+  }
 
   const speed = percentArg ? (parseFloat(percentArg) / 100).toFixed(1) : null;
 
