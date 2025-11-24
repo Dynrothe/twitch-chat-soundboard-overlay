@@ -1,0 +1,38 @@
+{
+  "sounds": [
+    {
+      "trigger_word": "example",
+      "sound": ["https://files.catbox.moe/o7iapi.mp3", "https://files.catbox.moe/btgovr.mp3", ""],
+      "volume": 0.5,
+      "chance": "100%",
+      "trigger_cooldown": 0,
+      "playback_speed": 1,
+      "reverse": false
+    },
+    {
+      "trigger_word": "example2",
+      "sound": [
+        {
+          "clip": "https://files.catbox.moe/o7iapi.mp3",
+          "volume": 0.3,
+          "chance": "33%"
+        },
+        {
+          "clip": "https://files.catbox.moe/us4is0.mp3",
+          "volume": 0.3,
+          "chance": "33%"
+        },
+        {
+          "clip": "https://files.catbox.moe/btgovr.mp3",
+          "volume": 0.3,
+          "chance": "33%"
+        }
+      ],
+      "volume": 0.5,
+      "chance": "100%",
+      "trigger_cooldown": 0,
+      "playback_speed": 1,
+      "reverse": false
+    }
+  ]
+}
