@@ -40,9 +40,19 @@ function App() {
   };
 
   const playSound = async (sound: SoundType, triggerWord: string, modifiers: any) => {
-    let audioClip = Array.isArray(sound.sound)
-      ? sound.sound[Math.floor(Math.random() * sound.sound.length)]
-      : sound.sound;
+    const src = sound.sound;
+    let audioClip = src;
+    let volume = sound.volume;
+
+    if (Array.isArray(src)) {
+      if (typeof src[0] === "string") {
+        audioClip = src[Math.floor(Math.random() * src.length)] as string;
+      } else {
+        const picked = pickWeightedSound(src);
+        audioClip = picked.clip;
+        volume = picked.volume;
+      }
+    }
 
     const audio = new Audio(decodeURI(audioClip));
 
@@ -69,7 +79,7 @@ function App() {
     }
 
     const gainNode = audioContext.createGain();
-    gainNode.gain.value = Number(sound.volume) || 0.5;
+    gainNode.gain.value = Number(volume) || 0.5;
 
     source.connect(gainNode).connect(audioContext.destination);
     source.start();
@@ -114,3 +124,21 @@ function App() {
 }
 
 export default App;
+
+function pickWeightedSound(sounds: any) {
+  const weights = sounds.map((s: any) => Number(s.chance?.replace("%", "")) || 0);
+  const total = weights.reduce((a: any, b: any) => a + b, 0);
+
+  if (total <= 0) return sounds[Math.floor(Math.random() * sounds.length)];
+
+  const roll = Math.random() * total;
+  let acc = 0;
+
+  for (let i = 0; i < sounds.length; i++) {
+    acc += weights[i];
+
+    if (roll < acc) return sounds[i];
+  }
+
+  return sounds[sounds.length - 1];
+}
