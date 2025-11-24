@@ -15,17 +15,17 @@
         {
           "clip": "https://files.catbox.moe/o7iapi.mp3",
           "volume": 0.3,
-          "chance": "33%"
+          "chance": "90%"
         },
         {
           "clip": "https://files.catbox.moe/us4is0.mp3",
           "volume": 0.3,
-          "chance": "33%"
+          "chance": "5%"
         },
         {
           "clip": "https://files.catbox.moe/btgovr.mp3",
           "volume": 0.3,
-          "chance": "33%"
+          "chance": "5%"
         }
       ],
       "volume": 0.5,
