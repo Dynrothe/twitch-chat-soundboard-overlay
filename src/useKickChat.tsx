@@ -3,7 +3,12 @@ import { SoundType } from "./SoundType";
 
 const WS_URL = "wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=8.4.0-rc2&flash=false";
 
-export default function useKickChat(soundList: SoundType[], soundCooldown: any, playSound: Function) {
+export default function useKickChat(
+  soundList: SoundType[],
+  soundCooldown: any,
+  playSound: Function,
+  playSoundWithModifiers: Function
+) {
   const urlParams = new URLSearchParams(window.location.search);
 
   const TWITCH_CHANNEL = urlParams.get("channel");
@@ -12,6 +17,7 @@ export default function useKickChat(soundList: SoundType[], soundCooldown: any, 
   const KICK = urlParams.get("kick");
   const MINIMUM_PITCH = urlParams.get("minpitch");
   const MAX_PITCH = urlParams.get("maxpitch");
+  const ALLOW_MODIFIERS = urlParams.get("allowmodifiers");
 
   const [connected, setConnected] = useState(false);
   const [initialized, setInitialized] = useState<boolean>(false);
@@ -99,7 +105,11 @@ export default function useKickChat(soundList: SoundType[], soundCooldown: any, 
           const args = message.split(/\s+/);
           const modifiers = handleModifiers(args, MINIMUM_PITCH, MAX_PITCH);
 
-          playSound(sound, triggerWord, modifiers);
+          if (ALLOW_MODIFIERS === "true") {
+            playSoundWithModifiers(sound, triggerWord, modifiers);
+          } else {
+            playSound(sound, triggerWord);
+          }
         } catch {
           // Do nothing
         }

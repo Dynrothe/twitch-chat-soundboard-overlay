@@ -39,7 +39,7 @@ function App() {
     return audioCtx!;
   };
 
-  const playSound = async (sound: SoundType, triggerWord: string, modifiers: any) => {
+  const playSoundWithModifiers = async (sound: SoundType, triggerWord: string, modifiers: any) => {
     const src = sound.sound;
     let audioClip = src;
     let volume = sound.volume;
@@ -99,8 +99,30 @@ function App() {
     }
   };
 
-  useTwitchChat(soundList, soundCooldown, playSound);
-  useKickChat(soundList, soundCooldown, playSound);
+  const playSound = (sound: SoundType, triggerWord: string) => {
+    let audioClip = sound.sound;
+    const isArray = Array.isArray(audioClip);
+
+    if (isArray) {
+      audioClip = audioClip[Math.floor(Math.random() * audioClip.length)];
+    }
+
+    const audio = new Audio(decodeURI(audioClip));
+    audio.volume = Number(sound.volume) || 0.5;
+
+    audio.play();
+
+    if (!sound.trigger_cooldown) return;
+
+    soundCooldown.current.push(sound.trigger_word);
+
+    setTimeout(() => {
+      soundCooldown.current = soundCooldown.current.filter((word) => word !== triggerWord);
+    }, sound.trigger_cooldown * 1000);
+  };
+
+  useTwitchChat(soundList, soundCooldown, playSound, playSoundWithModifiers);
+  useKickChat(soundList, soundCooldown, playSound, playSoundWithModifiers);
 
   if (soundList.length === 0) {
     return (

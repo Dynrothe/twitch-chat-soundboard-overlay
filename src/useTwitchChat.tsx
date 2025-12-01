@@ -2,7 +2,12 @@ import { useEffect, useState } from "react";
 import * as tmi from "tmi.js";
 import { SoundType } from "./SoundType";
 
-const useTwitchChat = (soundList: SoundType[], soundCooldown: any, playSound: Function) => {
+const useTwitchChat = (
+  soundList: SoundType[],
+  soundCooldown: any,
+  playSound: Function,
+  playSoundWithModifiers: Function
+) => {
   const urlParams = new URLSearchParams(window.location.search);
 
   const TWITCH_CHANNEL = urlParams.get("channel");
@@ -12,6 +17,7 @@ const useTwitchChat = (soundList: SoundType[], soundCooldown: any, playSound: Fu
   const SUB_ONLY = urlParams.get("subonly");
   const MINIMUM_PITCH = urlParams.get("minpitch");
   const MAX_PITCH = urlParams.get("maxpitch");
+  const ALLOW_MODIFIERS = urlParams.get("allowmodifiers");
 
   const ZERO_WIDTH_REGEX = /[\u200B\u200C\u200D\uFEFF\u2060\u180E]/g;
 
@@ -84,7 +90,11 @@ const useTwitchChat = (soundList: SoundType[], soundCooldown: any, playSound: Fu
       const args = message.split(/\s+/);
       const modifiers = handleModifiers(args, MINIMUM_PITCH, MAX_PITCH);
 
-      playSound(sound, triggerWord, modifiers);
+      if (ALLOW_MODIFIERS === "true") {
+        playSoundWithModifiers(sound, triggerWord, modifiers);
+      } else {
+        playSound(sound, triggerWord);
+      }
     });
   }, [soundList]);
 };
