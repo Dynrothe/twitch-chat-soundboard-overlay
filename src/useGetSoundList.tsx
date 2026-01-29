@@ -39,7 +39,7 @@ export const useGetSoundList = (setSoundList: Function, soundList: SoundType[]) 
     if (!SOUND_LIST_URL || soundList.length > 0) return;
 
     (async () => {
-      const REQUEST = await fetch("https://corsproxy.io/?url=" + SOUND_LIST_URL);
+      const REQUEST = await fetch("https://api.allorigins.win/raw?url=" + SOUND_LIST_URL);
       const SOUND_JSON = await REQUEST.json();
 
       if (SOUND_JSON && SOUND_JSON.sounds) {
