@@ -105,6 +105,17 @@ function handleModifiers(args: any, minpitch: any, maxpitch: any) {
   const arg1 = args[1]?.toLowerCase();
   const arg2 = args[2]?.toLowerCase();
 
+  const reverbArg =
+    arg1 === "reverb"
+      ? "1"
+      : arg2 === "reverb"
+      ? "1"
+      : arg1?.startswith("reverb=")
+      ? arg1.split("=")[1]
+      : arg2?.startswith("reverb=")
+      ? arg2.split("=")[1]
+      : null
+      
   const reverse = arg1 === "reverse" || arg2 === "reverse";
 
   const percentRegex = /^\d+%$/;
@@ -125,8 +136,18 @@ function handleModifiers(args: any, minpitch: any, maxpitch: any) {
 
   const speed = percentArg ? (parseFloat(percentArg) / 100).toFixed(1) : null;
 
+  let reverb = null;
+
+  if (reverbArg !== null) {
+    const value = Number(reverbArg);
+    if (!isNaN(value)) {
+      reverb = Math.min(Math.max(value, 0), 1);
+    }
+  }
+
   return {
     reverse,
     speed,
+    reverb,
   };
 }

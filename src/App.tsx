@@ -54,7 +54,6 @@ function App() {
       }
     }
 
-    const audio = new Audio(decodeURI(audioClip));
 
     const audioContext = getAudioContext();
     const audioReq = await fetch(decodeURI(audioClip));
@@ -81,15 +80,38 @@ function App() {
     const gainNode = audioContext.createGain();
     gainNode.gain.value = Number(volume) || 0.5;
 
-    source.connect(gainNode).connect(audioContext.destination);
+    let lastNode: AudioNode = source;
+
+    if (ALLOW_MODIFIERS === "true" && modifiers.reverb) {
+      const wet = Math.min(Math.max(Number(modifiers.reverb), 0), 1);
+
+      const convolver = audioContext.createConvolver();
+      convolver.buffer = createReverbBuffer(audioContext);
+
+      const wetGain = audioContext.createGain();
+      wetGain.gain.value = wet;
+
+      const dryGain = audioContext.createGain();
+      dryGain.gain.value = 1 - wet;
+
+      source.connect(dryGain).connect(gainNode);
+      source.connect(convolver).connect(wetGain).connect(gainNode);
+
+      source.start();
+      return;
+    }
+
+    lastNode.connect(gainNode).connect(audioContext.destination);
     source.start();
 
-    audio.addEventListener("ended", () => {
+
+    source.onended = () => {
       try {
         source.disconnect();
         gainNode.disconnect();
       } catch {}
-    });
+    };
+
 
     if (sound.trigger_cooldown) {
       soundCooldown.current.push(sound.trigger_word);
@@ -164,3 +186,25 @@ function pickWeightedSound(sounds: any) {
 
   return sounds[sounds.length - 1];
 }
+
+function createReverbBuffer(
+  audioContext: AudioContext,
+  duration = 2,
+  decay = 2
+) {
+  const rate = audioContext.sampleRate;
+  const length = rate * duration;
+  const impulse = audioContext.createBuffer(2, length, rate);
+
+  for (let c = 0; c < 2; c++) {
+    const channel = impulse.getChannelData(c);
+    for (let i = 0; i < length; i++) {
+      channel[i] =
+        (Math.random() * 2 - 1) *
+        Math.pow(1 - i / length, decay);
+    }
+  }
+
+  return impulse;
+}
+
