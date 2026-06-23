@@ -175,7 +175,7 @@ function handleModifiers(args: any, minpitch: any, maxpitch: any) {
       percentArg = parseFloat(maxpitch);
     }
   }
-  const speed = percentArg ? (parseFloat(percentArg) / 100).toFixed(1) : null;
+  const speed = percentArg ? (parseFloat(percentArg) / 100).toFixed(3) : null;
 
   return {
     reverse,
